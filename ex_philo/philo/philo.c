@@ -12,6 +12,14 @@ int is_valid_number(char *str)
 	}
 	return (0);
 }
+
+__uint64_t ft_get_time(void)
+{
+	struct timeval tv;
+	if (gettimeofday(&tv, NULL))
+		return (-1);
+	return ((tv.tv_sec * (__uint64_t)1000) + (tv.tv_usec / 1000));
+}
 int   ft_initialize_data(t_data *data, int ac, char *av[])
 {
 	int i;
@@ -37,7 +45,6 @@ int   ft_initialize_data(t_data *data, int ac, char *av[])
 		return (-1);
 	while (i < data->number_of_philosophers)
 		pthread_mutex_init(&data->forks[i++], NULL);
-	data->timestamp_in_ms = 0;
 	data->someone_died = 0;
 	return (0);
 }
@@ -62,50 +69,46 @@ int ft_philos(t_data *data)
 	return (0);
 }
 
-__uint64_t ft_get_time(void)
-{
-	struct timeval tv;
-	if (gettimeofday(&tv, NULL))
-		return (-1);
-	return ((tv.tv_sec * (__uint64_t)1000) + (tv.tv_usec / 1000));
-}
-
 void *ft_routine(void *arg)
 {
 	t_philo *philo = (t_philo *)arg;
 	t_data *data = philo->data;
+	__uint64_t now;
+	__uint64_t time_since_last_meal;
+
 	for(int i = 0; i < data->number_of_times_each_philosopher_must_eat; i++)
+	// while (1)
 	{
 		// printf("philo->time_now: %ld\n", philo->time_now);
 		// printf("philo->last_time_ate: %ld\n", philo->last_time_ate);
 		// printf("deff_wrong:%ld\n", philo->last_time_ate - philo->time_now);
 		// printf("deff_right:%ld\n", philo->time_now -philo->last_time_ate);
 		// printf("time_to_die: %d\n", data->time_to_die);
-		philo->time_now = ft_get_time();
-		if (philo->last_time_ate != 0 
-			&& philo->time_now - philo->last_time_ate >= (__uint64_t)data->time_to_die)
+		now = ft_get_time();
+		time_since_last_meal = now - data->timestamp_in_ms;
+		if (time_since_last_meal >= (__uint64_t)data->time_to_die)
 		{
 			if (!data->someone_died)
 			{
 				data->someone_died = 1;
-				printf("timestamp_in_ms %d died\n",philo->index);
-				exit(0);
+				printf("%ld %d died\n",now - data->timestamp_in_ms, philo->index);
+				return (NULL);
 			}
 			if (data->someone_died)
 				return (NULL);
 		}
 		pthread_mutex_lock(philo->left_fork);
 		pthread_mutex_lock(philo->right_fork);
-		printf("timestamp_in_ms %d has taken a fork\n", philo->index);
-		printf("timestamp_in_ms %d has taken a fork\n", philo->index);
-		printf("timestamp_in_ms %d is eating\n", philo->index);
+		printf("%ld %d has taken a fork\n", now - data->timestamp_in_ms, philo->index);
+		printf("%ld %d has taken a fork\n", now - data->timestamp_in_ms, philo->index);
+		printf("%ld %d is eating\n", now - data->timestamp_in_ms, philo->index);
 		usleep((data->time_to_eat * 1000));
-		philo->last_time_ate = ft_get_time();
 		pthread_mutex_unlock(philo->left_fork);
 		pthread_mutex_unlock(philo->right_fork);
-		printf("timestamp_in_ms %d is sleeping\n", philo->index);
+		philo->last_time_ate = ft_get_time();
+		printf("%ld %d is sleeping\n", now - data->timestamp_in_ms, philo->index);
 		usleep((data->time_to_sleep * 1000));
-		printf("timestamp_in_ms %d is thinking\n", philo->index);
+		printf("%ld %d is thinking\n", now - data->timestamp_in_ms, philo->index);
 	}
 	return (NULL);
 }
@@ -139,6 +142,7 @@ int main(int ac , char *av[])
 	{
 		if (ft_initialize_data(&data, ac, av))
 			return (write(2, "Erorr\n",6), 1);
+		data.timestamp_in_ms = ft_get_time();
 		if (ft_start_sumilation(&data))
 			return (write(2, "Erorr\n",6), 1);
 	}
