@@ -82,7 +82,6 @@ void *ft_routine(void *arg)
 	{
 		now = ft_get_time();
 		time_since_last_meal = now - philo->last_time_ate;
-		pthread_mutex_lock(&data->death_mutex);
 		if (time_since_last_meal >= (__uint64_t)data->time_to_die)
 		{
 			if (!data->someone_died)
@@ -90,15 +89,12 @@ void *ft_routine(void *arg)
 				data->someone_died = 1;
 				printf("%ld %d died\n",(now = ft_get_time()) - data->timestamp_in_ms, philo->index);
 			}
-			pthread_mutex_unlock(&data->death_mutex);
 			return (NULL);
 		}
 		if (data->someone_died)
 		{
-			pthread_mutex_unlock(&data->death_mutex);
 			return (NULL);
 		}
-		pthread_mutex_unlock(&data->death_mutex);
 		if (philo->index % 2 == 0)
 			usleep(100);
 		pthread_mutex_lock(philo->left_fork);
@@ -113,7 +109,6 @@ void *ft_routine(void *arg)
 		printf("%ld %d is sleeping\n", (now = ft_get_time()) - data->timestamp_in_ms, philo->index);
 		usleep((data->time_to_sleep * 1000));
 		printf("%ld %d is thinking\n", (now = ft_get_time()) - data->timestamp_in_ms, philo->index);
-		pthread_mutex_lock(&data->death_mutex);
 	}
 	return (NULL);
 }
