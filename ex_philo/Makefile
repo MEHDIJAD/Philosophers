@@ -4,7 +4,7 @@ SRCS = philo/philo.c \
 
 OBJS = $(SRCS:.c=.o)
 
-NAME = philosophers
+NAME = philos
 CC = cc
 RM = rm -f
 CFLAGS = -Wall -Wextra -Werror

@@ -22,6 +22,7 @@ typedef struct s_data
     int someone_died;
     pthread_mutex_t *forks;
     pthread_mutex_t death_mutex;
+    pthread_mutex_t meal;
     t_philo *ph;
 
 
