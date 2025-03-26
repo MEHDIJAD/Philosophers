@@ -22,7 +22,6 @@ typedef struct s_data
     int someone_died;
     pthread_mutex_t *forks;
     pthread_mutex_t death_mutex;
-    pthread_mutex_t meal;
     t_philo *ph;
 
 
@@ -34,6 +33,7 @@ typedef struct s_philo
     int         index;
     __uint64_t  last_time_ate;
     __uint64_t  time_now;
+    __uint64_t  time_since_last_meal;
     pthread_mutex_t  *left_fork;
     pthread_mutex_t  *right_fork;
     t_data      *data;
